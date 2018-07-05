@@ -1,0 +1,19 @@
+{
+    "name": "fang/php-request",
+    "description": "fang's php-request dev",
+    "type": "library",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "fangqk1991",
+            "email": "me@fangqk.com"
+        }
+    ],
+    "minimum-stability": "dev",
+    "autoload": {
+        "psr-4": {
+            "FC\\Request\\": "library/"
+        }
+    },
+    "require": {}
+}
