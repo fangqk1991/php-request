@@ -89,7 +89,7 @@ class FCRequest
     {
         if($this->requestType === self::kRequestJSON)
         {
-            $data_string = json_encode($this->_params);
+            $data_string = json_encode($this->_params, JSON_UNESCAPED_UNICODE);
             $headers = array(
                 'Content-Type: application/json; charset=utf-8',
                 'Content-Length: ' . strlen($data_string)
