@@ -6,6 +6,7 @@ class FCRequest
 {
     const kRequestForm = 0;
     const kRequestJSON = 1;
+    const kRequestText = 2;
 
     const kResponseText = 0;
     const kResponseJSON = 1;
@@ -92,6 +93,13 @@ class FCRequest
             $data_string = json_encode($this->_params, JSON_UNESCAPED_UNICODE);
             $headers = array(
                 'Content-Type: application/json; charset=utf-8',
+                'Content-Length: ' . strlen($data_string)
+            );
+        }
+        else if($this->requestType === self::kRequestText)
+        {
+            $data_string = strval($this->_params);
+            $headers = array(
                 'Content-Length: ' . strlen($data_string)
             );
         }
