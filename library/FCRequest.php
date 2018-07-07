@@ -90,33 +90,33 @@ class FCRequest
     {
         if($this->requestType === self::kRequestJSON)
         {
-            $data_string = json_encode($this->_params, JSON_UNESCAPED_UNICODE);
+            $postFields = json_encode($this->_params, JSON_UNESCAPED_UNICODE);
             $headers = array(
                 'Content-Type: application/json; charset=utf-8',
-                'Content-Length: ' . strlen($data_string)
+                'Content-Length: ' . strlen($postFields)
             );
         }
         else if($this->requestType === self::kRequestText)
         {
-            $data_string = strval($this->_params);
+            $postFields = strval($this->_params);
             $headers = array(
-                'Content-Length: ' . strlen($data_string)
+                'Content-Length: ' . strlen($postFields)
             );
         }
         else
         {
-            $data_string = http_build_query($this->_params);
-            $headers = array(
-                'Content-Type: application/x-www-form-urlencoded',
-                'Content-Length: ' . strlen($data_string)
-            );
+            $postFields = $this->_params;
         }
 
         $curl = curl_init($this->_url);
         curl_setopt($curl, CURLOPT_POST, 1);
         curl_setopt($curl, CURLOPT_RETURNTRANSFER, 1);
-        curl_setopt($curl, CURLOPT_POSTFIELDS, $data_string);
-        curl_setopt($curl, CURLOPT_HTTPHEADER, $headers);
+        curl_setopt($curl, CURLOPT_POSTFIELDS, $postFields);
+
+        if(!empty($headers))
+        {
+            curl_setopt($curl, CURLOPT_HTTPHEADER, $headers);
+        }
 
         if($this->_proxy)
         {
