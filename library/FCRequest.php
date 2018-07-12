@@ -26,10 +26,13 @@ class FCRequest
     protected $_rsaCertPem;
     protected $_rsaPrivatePem;
 
+    protected $_customHeaders;
+
     public function __construct($url, $params = array())
     {
         $this->_url = $url;
         $this->_params = $params;
+        $this->_customHeaders = array();
 
         $this->loadDefaultSettings();
     }
@@ -56,6 +59,11 @@ class FCRequest
         $this->_sslVerify = $bool;
     }
 
+    public function addCustomHeader($value)
+    {
+        array_push($this->_customHeaders, $value);
+    }
+
     public function get()
     {
         $url = $this->_url;
@@ -68,6 +76,11 @@ class FCRequest
 
         curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
         curl_setopt($curl, CURLOPT_TIMEOUT, 500);
+
+        if(count($this->_customHeaders) > 0)
+        {
+            curl_setopt($curl, CURLOPT_HTTPHEADER, $this->_customHeaders);
+        }
 
         if($this->_proxy)
         {
@@ -115,6 +128,7 @@ class FCRequest
 
         if(!empty($headers))
         {
+            $headers = array_merge($headers, $this->_customHeaders);
             curl_setopt($curl, CURLOPT_HTTPHEADER, $headers);
         }
 
