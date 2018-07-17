@@ -2,6 +2,8 @@
 
 namespace FC\Request;
 
+use Exception;
+
 class FCRequest
 {
     const kRequestForm = 0;
@@ -74,7 +76,7 @@ class FCRequest
         }
         $curl = curl_init($url);
 
-        curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
+        curl_setopt($curl, CURLOPT_RETURNTRANSFER, 1);
         curl_setopt($curl, CURLOPT_TIMEOUT, 500);
 
         if(count($this->_customHeaders) > 0)
@@ -164,6 +166,66 @@ class FCRequest
         }
 
         $this->_response = $response;
+    }
+
+    public function download($targetPath)
+    {
+        $url = $this->_url;
+
+        if(is_dir($targetPath))
+        {
+            $dirPath = $targetPath;
+            $fileName = basename($url);
+        }
+        else
+        {
+            $dirPath = dirname($targetPath);
+            if(!is_dir($dirPath))
+            {
+                mkdir($dirPath, 0775, TRUE);
+            }
+            $fileName = basename($targetPath);
+        }
+
+        $targetPath = sprintf('%s/%s', $dirPath, $fileName);
+        $tmpPath = $targetPath . '.tmp';
+
+        if(file_exists($tmpPath))
+            unlink($tmpPath);
+
+        if(!empty($this->_params))
+        {
+            $url = $this->urlAppendQuery($url, http_build_query($this->_params));
+        }
+
+        $fp = fopen($tmpPath, 'wb');
+
+        $curl = curl_init($url);
+
+        curl_setopt($curl, CURLOPT_FILE, $fp);
+        curl_setopt($curl, CURLOPT_TIMEOUT, 500);
+
+        if(count($this->_customHeaders) > 0)
+        {
+            curl_setopt($curl, CURLOPT_HTTPHEADER, $this->_customHeaders);
+        }
+
+        if($this->_proxy)
+        {
+            curl_setopt($curl, CURLOPT_PROXY, $this->_proxy);
+        }
+
+        curl_exec($curl);
+        $this->_httpCode = curl_getinfo($curl, CURLINFO_HTTP_CODE);
+        curl_close($curl);
+        fclose($fp);
+
+        if($this->isOK())
+        {
+            if(file_exists($targetPath))
+                unlink($targetPath);
+            rename($tmpPath, $targetPath);
+        }
     }
 
     public function isOK()
