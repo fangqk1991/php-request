@@ -66,25 +66,31 @@ class FCRequest
         array_push($this->_customHeaders, $value);
     }
 
-    public function url()
+    protected function urlForGet()
+    {
+        $params = $this->paramsForGet();
+        return $this->addQueryParams($this->_url, $params);
+    }
+
+    protected function paramsForGet()
+    {
+        return $this->_params;
+    }
+
+    protected function urlForPost()
     {
         return $this->_url;
     }
 
-    public function params()
+    protected function paramsForPost()
     {
         return $this->_params;
     }
 
     public function get()
     {
-        $url = $this->url();
-        $params = $this->params();
+        $url = $this->urlForGet();
 
-        if(!empty($params))
-        {
-            $url = $this->urlAppendQuery($url, http_build_query($params));
-        }
         $curl = curl_init($url);
 
         curl_setopt($curl, CURLOPT_RETURNTRANSFER, 1);
@@ -114,8 +120,8 @@ class FCRequest
 
     public function post()
     {
-        $url = $this->url();
-        $params = $this->params();
+        $url = $this->urlForPost();
+        $params = $this->paramsForPost();
 
         if($this->requestType === self::kRequestJSON)
         {
@@ -184,8 +190,7 @@ class FCRequest
 
     public function download($targetPath)
     {
-        $url = $this->url();
-        $params = $this->params();
+        $url = $this->urlForGet();
 
         if(is_dir($targetPath))
         {
@@ -207,11 +212,6 @@ class FCRequest
 
         if(file_exists($tmpPath))
             unlink($tmpPath);
-
-        if(!empty($params))
-        {
-            $url = $this->urlAppendQuery($url, http_build_query($params));
-        }
 
         $fp = fopen($tmpPath, 'wb');
 
@@ -253,19 +253,23 @@ class FCRequest
         return $this->_response;
     }
 
-    protected function urlAppendQuery($url, $addition)
+    protected function addQueryParams($url, $params)
     {
-        $queryIndex = strpos($url, '?');
-
-        if($queryIndex === FALSE)
+        if(empty($params))
         {
-            return sprintf('%s?%s', $url, $addition);
-        }
-        else if($queryIndex + 1 === strlen($url))
-        {
-            return sprintf('%s%s', $url, $addition);
+            return $url;
         }
 
-        return sprintf('%s&%s', $url, $addition);
+        $parts = parse_url($url);
+        $queryParams = array();
+
+        if(isset($parts['query']))
+        {
+            parse_str($parts['query'], $queryParams);
+        }
+
+        $queryParams = array_merge($queryParams, $params);
+        return sprintf('%s://%s%s?%s', $parts['scheme'], $parts['host'],
+            $parts['path'], http_build_query($queryParams));
     }
 }
