@@ -66,13 +66,24 @@ class FCRequest
         array_push($this->_customHeaders, $value);
     }
 
+    public function url()
+    {
+        return $this->_url;
+    }
+
+    public function params()
+    {
+        return $this->_params;
+    }
+
     public function get()
     {
-        $url = $this->_url;
+        $url = $this->url();
+        $params = $this->params();
 
-        if(!empty($this->_params))
+        if(!empty($params))
         {
-            $url = $this->urlAppendQuery($url, http_build_query($this->_params));
+            $url = $this->urlAppendQuery($url, http_build_query($params));
         }
         $curl = curl_init($url);
 
@@ -103,9 +114,12 @@ class FCRequest
 
     public function post()
     {
+        $url = $this->url();
+        $params = $this->params();
+
         if($this->requestType === self::kRequestJSON)
         {
-            $postFields = json_encode($this->_params, JSON_UNESCAPED_UNICODE);
+            $postFields = json_encode($params, JSON_UNESCAPED_UNICODE);
             $headers = array(
                 'Content-Type: application/json; charset=utf-8',
                 'Content-Length: ' . strlen($postFields)
@@ -113,17 +127,17 @@ class FCRequest
         }
         else if($this->requestType === self::kRequestText)
         {
-            $postFields = strval($this->_params);
+            $postFields = strval($params);
             $headers = array(
                 'Content-Length: ' . strlen($postFields)
             );
         }
         else
         {
-            $postFields = $this->_params;
+            $postFields = $params;
         }
 
-        $curl = curl_init($this->_url);
+        $curl = curl_init($url);
         curl_setopt($curl, CURLOPT_POST, 1);
         curl_setopt($curl, CURLOPT_RETURNTRANSFER, 1);
         curl_setopt($curl, CURLOPT_POSTFIELDS, $postFields);
@@ -170,7 +184,8 @@ class FCRequest
 
     public function download($targetPath)
     {
-        $url = $this->_url;
+        $url = $this->url();
+        $params = $this->params();
 
         if(is_dir($targetPath))
         {
@@ -193,9 +208,9 @@ class FCRequest
         if(file_exists($tmpPath))
             unlink($tmpPath);
 
-        if(!empty($this->_params))
+        if(!empty($params))
         {
-            $url = $this->urlAppendQuery($url, http_build_query($this->_params));
+            $url = $this->urlAppendQuery($url, http_build_query($params));
         }
 
         $fp = fopen($tmpPath, 'wb');
