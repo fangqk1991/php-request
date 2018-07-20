@@ -22,7 +22,7 @@ class FCRequest
     protected $_proxy;
 
     protected $_url;
-    protected $_params;
+    protected $_rawParams;
 
     protected $_sslVerify;
     protected $_rsaCertPem;
@@ -33,7 +33,7 @@ class FCRequest
     public function __construct($url, $params = array())
     {
         $this->_url = $url;
-        $this->_params = $params;
+        $this->_rawParams = $params;
         $this->_customHeaders = array();
 
         $this->loadDefaultSettings();
@@ -66,25 +66,25 @@ class FCRequest
         array_push($this->_customHeaders, $value);
     }
 
-    protected function urlForGet()
+    private function urlForGet()
     {
-        $params = $this->paramsForGet();
+        $params = array_merge($this->retainQueryParams(), $this->params());
         return $this->addQueryParams($this->_url, $params);
     }
 
-    protected function paramsForGet()
+    private function urlForPost()
     {
-        return $this->_params;
+        return $this->addQueryParams($this->_url, $this->retainQueryParams());
     }
 
-    protected function urlForPost()
+    protected function retainQueryParams()
     {
-        return $this->_url;
+        return array();
     }
 
-    protected function paramsForPost()
+    protected function params()
     {
-        return $this->_params;
+        return $this->_rawParams;
     }
 
     public function get()
@@ -121,7 +121,7 @@ class FCRequest
     public function post()
     {
         $url = $this->urlForPost();
-        $params = $this->paramsForPost();
+        $params = $this->params();
 
         if($this->requestType === self::kRequestJSON)
         {
