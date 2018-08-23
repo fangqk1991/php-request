@@ -2,13 +2,12 @@
 
 namespace FC\Request;
 
-use Exception;
-
 class FCRequest
 {
     const kRequestForm = 0;
     const kRequestJSON = 1;
     const kRequestText = 2;
+    const kRequestFormData = 3;
 
     const kResponseText = 0;
     const kResponseJSON = 1;
@@ -123,7 +122,15 @@ class FCRequest
         $url = $this->urlForPost();
         $params = $this->params();
 
-        if($this->requestType === self::kRequestJSON)
+        if($this->requestType === self::kRequestForm)
+        {
+            $postFields = http_build_query($params);
+            $headers = array(
+                'Content-Type: application/x-www-form-urlencoded; charset=utf-8',
+                'Content-Length: ' . strlen($postFields)
+            );
+        }
+        else if($this->requestType === self::kRequestJSON)
         {
             $postFields = json_encode($params, JSON_UNESCAPED_UNICODE);
             $headers = array(
@@ -245,6 +252,11 @@ class FCRequest
 
     public function isOK()
     {
+        if($this->responseType === self::kResponseJSON && !is_array($this->getResponse()))
+        {
+            return FALSE;
+        }
+
         return $this->_httpCode === 200;
     }
 
