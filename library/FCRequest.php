@@ -11,6 +11,7 @@ class FCRequest
 
     const kResponseText = 0;
     const kResponseJSON = 1;
+    const kResponseFile = 2;
 
     public $requestType;
     public $responseType;
@@ -197,6 +198,8 @@ class FCRequest
 
     public function download($targetPath)
     {
+        $this->responseType = self::kResponseFile;
+
         $url = $this->urlForGet();
 
         if(is_dir($targetPath))
