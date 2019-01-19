@@ -17,12 +17,16 @@ class FCTypicalRequest extends FCRequest
     {
         parent::get();
         $this->proceedResponse();
+
+        return $this->_response;
     }
 
     public function post()
     {
         parent::post();
         $this->proceedResponse();
+
+        return $this->_response;
     }
 
     private function proceedResponse()

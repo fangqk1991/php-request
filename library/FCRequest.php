@@ -116,6 +116,7 @@ class FCRequest
         }
 
         $this->_response = $response;
+        return $response;
     }
 
     public function post()
@@ -194,6 +195,7 @@ class FCRequest
         }
 
         $this->_response = $response;
+        return $response;
     }
 
     public function download($targetPath)
@@ -261,6 +263,11 @@ class FCRequest
         }
 
         return $this->_httpCode === 200;
+    }
+
+    public function getCode()
+    {
+        return $this->_httpCode;
     }
 
     public function getResponse()
