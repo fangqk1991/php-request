@@ -109,7 +109,7 @@ $request->download(__DIR__ . '/../run.local/');
 
 ```
 {
-	"data": "字符串|数字|字典|数组|空值"
+    "data": "字符串|数字|字典|数组|空值"
 }
 ```
 
@@ -117,10 +117,10 @@ $request->download(__DIR__ . '/../run.local/');
 
 ```
 {
-	"error": {
-		"code": -1,
-		"msg": "some error message"
-	}
+    "error": {
+        "code": -1,
+        "msg": "some error message"
+    }
 }
 ```
 
